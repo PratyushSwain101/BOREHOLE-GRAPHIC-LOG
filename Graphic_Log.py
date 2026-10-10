@@ -9,7 +9,7 @@ import io
 
 st.set_page_config(page_title="Geological Graphic Log & Map Generator", layout="wide")
 
-st.title("📊 Geological Borehole Graphic Log Generator")
+st.title("📊 Geological Graphic Log Generator")
 st.markdown("Upload collar, lithology, and boundary CSV files to generate graphic logs.")
 
 # --- SIDEBAR CONFIGURATIONS ---
