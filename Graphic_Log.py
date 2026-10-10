@@ -423,7 +423,7 @@ with tab2:
             col_width_cm = st.number_input("Log Column Width (cm)", min_value=0.2, max_value=2.0, value=0.5, step=0.1)
 
         st.markdown("---")
-        st.header("Select Boreholes (Max - 5 once)")
+        st.header("Select Boreholes (Max - 5 at a time)")
         available_bhs = collar_df['BORE ID'].unique().tolist()
         
         selected_bhs = st.multiselect(
