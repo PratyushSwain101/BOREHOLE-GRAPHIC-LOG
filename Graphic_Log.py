@@ -7,10 +7,99 @@ from matplotlib.backends.backend_pdf import PdfPages
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import io
 
-st.set_page_config(page_title="Geological Graphic Log Generator", layout="wide")
+# --- STREAMLIT PAGE CONFIGURATION ---
+st.set_page_config(
+    page_title="Graphic Log Generator | @Pratyush",
+    page_icon="⛏️",
+    layout="wide"
+)
 
-st.title("📊 Geological Graphic Log Generator")
-st.markdown("Upload collar, lithology, and boundary CSV files.")
+# --- MODERN STYLING & COLOR SCHEME (SLATE & GOLD) ---
+st.markdown("""
+<style>
+    /* Main Background & Text Colors */
+    .stApp {
+        background-color: #0f172a;
+        color: #e2e8f0;
+    }
+    
+    /* Header Card */
+    .header-card {
+        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+        border: 1px solid #334155;
+        padding: 1.25rem 1.75rem;
+        border-radius: 12px;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    .header-title {
+        color: #f59e0b;
+        font-size: 2.1rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .header-subtitle {
+        color: #94a3b8;
+        font-size: 0.95rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Creator Signature Tag */
+    .creator-tag {
+        float: right;
+        background-color: #334155;
+        color: #fbbf24;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        border: 1px solid #d97706;
+    }
+
+    /* Subheaders and Section Titles */
+    h2, h3 {
+        color: #f1f5f9 !important;
+        font-weight: 600 !important;
+    }
+
+    /* Streamlit Primary Button Custom Styling */
+    div.stButton > button[kind="primary"] {
+        background: linear-gradient(135deg, #d97706 0%, #b45309 100%) !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        font-weight: 600 !important;
+        padding: 0.6rem 1.2rem !important;
+        box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.4) !important;
+    }
+    
+    div.stButton > button[kind="primary"]:hover {
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%) !important;
+        box-shadow: 0 6px 12px -2px rgba(245, 158, 11, 0.5) !important;
+    }
+
+    /* Footer Branding */
+    .app-footer {
+        text-align: center;
+        padding: 1rem;
+        color: #64748b;
+        font-size: 0.85rem;
+        border-top: 1px solid #1e293b;
+        margin-top: 3rem;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# App Header Banner with Creator Signature
+st.markdown("""
+<div class="header-card">
+    <span class="creator-tag">Designed by @Pratyush</span>
+    <div class="header-title">📊 Geological Graphic Log Generator</div>
+    <div class="header-subtitle">Automated Graphic Log Generator</div>
+</div>
+""", unsafe_allow_html=True)
 
 # Initialize Session State
 if "generated_pdf" not in st.session_state:
@@ -99,7 +188,7 @@ def get_page_dimensions(size, orientation):
 def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_size, page_orientation, scale_option, scale_meters_per_cm, col_width_cm, max_boreholes_per_page=5):
     """
     Generate PDF containing borehole graphic logs strictly honoring exact physical column width
-    and vertical depth scaling without stretching.
+    and vertical depth scaling without stretching. Includes @Pratyush signature watermark.
     """
     pdf_buffer = io.BytesIO()
     page_w_in, page_h_in = get_page_dimensions(page_size, page_orientation)
@@ -140,6 +229,9 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                     f"Scale: {scale_option} | Column Width: {col_width_cm:.2f} cm | Segment: {depth_start:.1f} m to {depth_end:.1f} m",
                     fontsize=12, fontweight='bold', y=0.96
                 )
+                
+                # Creator Signature on PDF Bottom Right
+                fig.text(0.98, 0.02, "Designed by @Pratyush", fontsize=8, color='gray', style='italic', ha='right', va='bottom')
                 
                 n_cols = len(chunk)
                 slot_w_in = page_w_in / n_cols
@@ -281,7 +373,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
 
 
 def create_matplotlib_plan_map(collar_df, boundary_df, selected_bhs):
-    """Generate publication-ready Matplotlib map with exact aspect ratio, highlighted targets, and scalebar."""
+    """Generate publication-ready Matplotlib map with exact aspect ratio, highlighted targets, scalebar, and signature."""
     fig, ax = plt.subplots(figsize=(10, 8))
     
     if boundary_df is not None:
@@ -359,7 +451,11 @@ def create_matplotlib_plan_map(collar_df, boundary_df, selected_bhs):
         fontsize=10, fontweight='bold', ha='center', va='center',
     )
 
-    ax.set_title("BOREHOLE LOCATION MAP", fontsize=9, pad=5)
+    # Creator Signature Watermark on Map
+    ax.text(0.98, 0.02, "Designed by @Pratyush", transform=ax.transAxes,
+            fontsize=8, color='gray', style='italic', ha='right', va='bottom', zorder=10)
+
+    ax.set_title("BOREHOLE LOCATION PLAN MAP", fontsize=10, fontweight='bold', pad=8)
     ax.set_xlabel("Easting (X)", fontsize=10, fontweight='bold')
     ax.set_ylabel("Northing (Y)", fontsize=10, fontweight='bold')
     ax.legend(loc='lower right', frameon=True, facecolor='white', edgecolor='black', framealpha=0.9, fontsize=8.5)
@@ -392,20 +488,21 @@ with tab1:
     if collar_file and litho_file:
         collar_df = pd.read_csv(collar_file)
         litho_df = pd.read_csv(litho_file)
-        boundary_df = pd.read_csv(boundary_file) if boundary_file else None
+        boundary_file_df = pd.read_csv(boundary_file) if boundary_file else None
         
         collar_df.columns = [c.strip().upper() for c in collar_df.columns]
         litho_df.columns = [c.strip().upper() for c in litho_df.columns]
+        boundary_df = boundary_file_df
         
         merged_seams_df = preprocess_litho(litho_df, max_gap_meters=2.0)
-        st.success("✅ CSV files loaded and preprocessed! Switch to Tab 2 ('📄 Graphic Logs PDF & Settings') to configure layout and export.")
+        st.success("✅ CSV files loaded and preprocessed successfully! Proceed to Tab 2 ('📄 Graphic Logs PDF & Settings').")
     else:
-        st.info("👈 Upload `COLLAR.csv` and `LITHOLOGY.csv` here to begin.")
+        st.info("👈 Upload `COLLAR.csv` and `LITHOLOGY.csv` here to get started.")
 
 # --- TAB 2: CONFIGURATION, SELECTION & GENERATION ---
 with tab2:
-    if collar_file and litho_file and collar_df is not None:
-        st.header("Layout & Scale Configuration")
+    if collar_file and litho_file and collar_df is not None and litho_df is not None:
+        st.header("1. Layout & Scale Configuration")
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
         
         with col_c1:
@@ -423,59 +520,68 @@ with tab2:
             col_width_cm = st.number_input("Log Column Width (cm)", min_value=0.2, max_value=2.0, value=0.5, step=0.1)
 
         st.markdown("---")
-        st.header("Select Boreholes (Max - 5 at a time)")
-        available_bhs = collar_df['BORE ID'].unique().tolist()
+        st.header("2. Select Target Boreholes (Max - 5 at a time)")
         
-        selected_bhs = st.multiselect(
-            "Choose up to 5 Boreholes for Graphic Logging:",
-            options=available_bhs,
-            default=available_bhs[:5],
-            max_selections=5  # Strict limit constraint
-        )
+        # --- FEATURE MODIFICATION: SHOW ONLY BOREHOLES WITH LITHOLOGY DATA ---
+        litho_boreholes = litho_df['BORE ID'].dropna().astype(str).str.strip().unique().tolist()
+        collar_boreholes = collar_df['BORE ID'].dropna().astype(str).str.strip().unique().tolist()
         
-        st.markdown(" ")
-        generate_btn = st.button("🚀 Generate Graphic Logs PDF", type="primary", use_container_width=True)
+        # Intersection: Only collars that actually possess logged lithological data
+        available_bhs = [bh for bh in collar_boreholes if bh in litho_boreholes]
         
-        if generate_btn:
-            if selected_bhs:
-                pdf_bytes = create_graphic_logs_pdf(
-                    collar_df, litho_df, merged_seams_df, selected_bhs,
-                    page_size, page_orientation, scale_option, scale_meters_per_cm, col_width_cm, max_boreholes_per_page=5
-                )
-                
-                # Dynamic PDF File Naming
-                if len(selected_bhs) == 1:
-                    filename = f"Graphic_Log_{selected_bhs[0]}_{page_size}_{page_orientation}.pdf"
-                elif len(selected_bhs) <= 3:
-                    bhs_str = "_".join(selected_bhs)
-                    filename = f"Graphic_Logs_{bhs_str}_{page_size}_{page_orientation}.pdf"
-                else:
-                    filename = f"Graphic_Logs_{selected_bhs[0]}_to_{selected_bhs[-1]}_{page_size}_{page_orientation}.pdf"
-                
-                # Store PDF in session state
-                st.session_state.generated_pdf = pdf_bytes
-                st.session_state.pdf_filename = filename
-                
-                st.success("🎉 Graphic logs PDF generated successfully!")
-            else:
-                st.error("Please select at least 1 borehole.")
-        
-        st.markdown("---")
-        if st.session_state.generated_pdf:
-            st.success(f"File Ready: **{st.session_state.pdf_filename}**")
-            st.download_button(
-                label=f"📥 Download PDF ({st.session_state.pdf_filename})",
-                data=st.session_state.generated_pdf,
-                file_name=st.session_state.pdf_filename,
-                mime="application/pdf",
-                type="primary"
+        if not available_bhs:
+            st.warning("⚠️ No matching boreholes found between collar and lithology data.")
+        else:
+            selected_bhs = st.multiselect(
+                "Choose up to 5 Boreholes with Lithology Data for Graphic Logging:",
+                options=available_bhs,
+                default=available_bhs[:min(5, len(available_bhs))],
+                max_selections=5  # Hard limit constraint
             )
+            
+            st.markdown(" ")
+            generate_btn = st.button("🚀 Generate Graphic Logs PDF", type="primary", use_container_width=True)
+            
+            if generate_btn:
+                if selected_bhs:
+                    pdf_bytes = create_graphic_logs_pdf(
+                        collar_df, litho_df, merged_seams_df, selected_bhs,
+                        page_size, page_orientation, scale_option, scale_meters_per_cm, col_width_cm, max_boreholes_per_page=5
+                    )
+                    
+                    # Dynamic PDF File Naming
+                    if len(selected_bhs) == 1:
+                        filename = f"Graphic_Log_{selected_bhs[0]}_{page_size}_{page_orientation}.pdf"
+                    elif len(selected_bhs) <= 3:
+                        bhs_str = "_".join(selected_bhs)
+                        filename = f"Graphic_Logs_{bhs_str}_{page_size}_{page_orientation}.pdf"
+                    else:
+                        filename = f"Graphic_Logs_{selected_bhs[0]}_to_{selected_bhs[-1]}_{page_size}_{page_orientation}.pdf"
+                    
+                    # Store PDF in session state
+                    st.session_state.generated_pdf = pdf_bytes
+                    st.session_state.pdf_filename = filename
+                    
+                    st.success("🎉 Graphic logs PDF generated successfully!")
+                else:
+                    st.error("Please select at least 1 borehole.")
+            
+            st.markdown("---")
+            if st.session_state.generated_pdf:
+                st.success(f"Ready for Download: **{st.session_state.pdf_filename}**")
+                st.download_button(
+                    label=f"📥 Download PDF ({st.session_state.pdf_filename})",
+                    data=st.session_state.generated_pdf,
+                    file_name=st.session_state.pdf_filename,
+                    mime="application/pdf",
+                    type="primary"
+                )
     else:
         st.warning("Please upload `COLLAR.csv` and `LITHOLOGY.csv` in Tab 1 first.")
 
 # --- TAB 3: PLAN MAP ---
 with tab3:
-    st.header("🗺️ BH Location Plan ")
+    st.header("🗺️ BH Location Plan Map")
     if collar_df is not None:
         target_bhs = selected_bhs if ('selected_bhs' in locals() and selected_bhs) else collar_df['BORE ID'].unique().tolist()[:5]
         map_fig = create_matplotlib_plan_map(collar_df, boundary_df, target_bhs)
@@ -490,3 +596,10 @@ with tab4:
         st.dataframe(merged_seams_df, use_container_width=True)
     else:
         st.info("Upload lithology CSV in Tab 1 to view the processed seam summary.")
+
+# --- FOOTER BRANDING ---
+st.markdown("""
+<div class="app-footer">
+    Borehole Graphic Log Generator • Crafted by <strong>@Pratyush</strong>
+</div>
+""", unsafe_allow_html=True)
