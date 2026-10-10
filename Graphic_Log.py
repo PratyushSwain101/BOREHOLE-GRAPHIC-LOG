@@ -96,7 +96,7 @@ st.markdown("""
 st.markdown("""
 <div class="header-card">
     <span class="creator-tag">Designed by @Pratyush</span>
-    <div class="header-title">📊 Geological Graphic Log Generator</div>
+    <div class="header-title">📊 Graphic Log Generator</div>
     <div class="header-subtitle">Automated Graphic Log Generator</div>
 </div>
 """, unsafe_allow_html=True)
@@ -186,10 +186,7 @@ def get_page_dimensions(size, orientation):
 
 
 def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_size, page_orientation, scale_option, scale_meters_per_cm, col_width_cm, max_boreholes_per_page=5):
-    """
-    Generate PDF containing borehole graphic logs strictly honoring exact physical column width
-    and vertical depth scaling without stretching. Includes @Pratyush signature watermark.
-    """
+    """Generate PDF containing borehole graphic logs with @Pratyush signature watermark."""
     pdf_buffer = io.BytesIO()
     page_w_in, page_h_in = get_page_dimensions(page_size, page_orientation)
     
@@ -373,7 +370,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
 
 
 def create_matplotlib_plan_map(collar_df, boundary_df, selected_bhs):
-    """Generate publication-ready Matplotlib map with exact aspect ratio, highlighted targets, scalebar, and signature."""
+    """Generate publication-ready Matplotlib map with signature watermark."""
     fig, ax = plt.subplots(figsize=(10, 8))
     
     if boundary_df is not None:
@@ -469,7 +466,7 @@ tab1, tab2, tab3, tab4 = st.tabs([
     "📁 Upload Geological Data",
     "📄 Graphic Logs PDF & Settings",
     "🗺️ Plan Map",
-    "📋 Merged Seam Data"
+    "📋 Seam & Collar Data"
 ])
 
 collar_df, litho_df, boundary_df, merged_seams_df = None, None, None, None
@@ -495,7 +492,7 @@ with tab1:
         boundary_df = boundary_file_df
         
         merged_seams_df = preprocess_litho(litho_df, max_gap_meters=2.0)
-        st.success("✅ CSV files loaded and preprocessed successfully! Proceed to Tab 2 ('📄 Graphic Logs PDF & Settings').")
+        st.success("✅ CSV files loaded and preprocessed successfully! Proceed to Tab 2 or Tab 4.")
     else:
         st.info("👈 Upload `COLLAR.csv` and `LITHOLOGY.csv` here to get started.")
 
@@ -508,7 +505,7 @@ with tab2:
         with col_c1:
             page_size = st.selectbox("Page Size", options=["A3", "A4", "A2"], index=0)
         with col_c2:
-            page_orientation = st.selectbox("Page Orientation", options=["Landscape", "Portrait"], index=0)
+            page_orientation = st.selectbox("Page Orientation", options=["Portrait","Landscape"], index=0)
         with col_c3:
             scale_option = st.selectbox(
                 "Vertical Scale (1 cm = X m)",
@@ -522,11 +519,8 @@ with tab2:
         st.markdown("---")
         st.header("2. Select Target Boreholes (Max - 5 at a time)")
         
-        # --- FEATURE MODIFICATION: SHOW ONLY BOREHOLES WITH LITHOLOGY DATA ---
         litho_boreholes = litho_df['BORE ID'].dropna().astype(str).str.strip().unique().tolist()
         collar_boreholes = collar_df['BORE ID'].dropna().astype(str).str.strip().unique().tolist()
-        
-        # Intersection: Only collars that actually possess logged lithological data
         available_bhs = [bh for bh in collar_boreholes if bh in litho_boreholes]
         
         if not available_bhs:
@@ -536,7 +530,7 @@ with tab2:
                 "Choose up to 5 Boreholes with Lithology Data for Graphic Logging:",
                 options=available_bhs,
                 default=available_bhs[:min(5, len(available_bhs))],
-                max_selections=5  # Hard limit constraint
+                max_selections=5
             )
             
             st.markdown(" ")
@@ -549,7 +543,6 @@ with tab2:
                         page_size, page_orientation, scale_option, scale_meters_per_cm, col_width_cm, max_boreholes_per_page=5
                     )
                     
-                    # Dynamic PDF File Naming
                     if len(selected_bhs) == 1:
                         filename = f"Graphic_Log_{selected_bhs[0]}_{page_size}_{page_orientation}.pdf"
                     elif len(selected_bhs) <= 3:
@@ -558,7 +551,6 @@ with tab2:
                     else:
                         filename = f"Graphic_Logs_{selected_bhs[0]}_to_{selected_bhs[-1]}_{page_size}_{page_orientation}.pdf"
                     
-                    # Store PDF in session state
                     st.session_state.generated_pdf = pdf_bytes
                     st.session_state.pdf_filename = filename
                     
@@ -589,17 +581,42 @@ with tab3:
     else:
         st.info("Upload collar CSV in Tab 1 to view the Plan Map.")
 
-# --- TAB 4: MERGED SEAMS SUMMARY ---
+# --- TAB 4: MERGED SEAMS & COLLAR DATA ---
 with tab4:
-    st.header("📋 Processed Summary")
-    if merged_seams_df is not None:
-        st.dataframe(merged_seams_df, use_container_width=True)
+    st.header("📋 Processed Seam & Collar Database")
+    
+    if collar_df is not None and merged_seams_df is not None:
+        all_tab4_bhs = collar_df['BORE ID'].unique().tolist()
+        
+        col_f1, col_f2 = st.columns([3, 1])
+        with col_f1:
+            filter_bhs = st.multiselect(
+                "Filter by Borehole (Leave empty or select all to view all boreholes):",
+                options=all_tab4_bhs,
+                default=[]
+            )
+        with col_f2:
+            st.markdown("<br>", unsafe_allow_html=True)
+            reset_all = st.button("🔄 Reset / View All")
+            if reset_all:
+                filter_bhs = []
+        
+        # Determine active dataset to display
+        display_seams = merged_seams_df if not filter_bhs else merged_seams_df[merged_seams_df['BORE ID'].isin(filter_bhs)]
+        display_collars = collar_df if not filter_bhs else collar_df[collar_df['BORE ID'].isin(filter_bhs)]
+        
+        st.subheader("Merged Seams Summary")
+        st.dataframe(display_seams, use_container_width=True)
+        
+        st.markdown("---")
+        st.subheader("Collar Database")
+        st.dataframe(display_collars, use_container_width=True)
     else:
-        st.info("Upload lithology CSV in Tab 1 to view the processed seam summary.")
+        st.info("Upload CSV files in Tab 1 to view databases.")
 
 # --- FOOTER BRANDING ---
 st.markdown("""
 <div class="app-footer">
-    Borehole Graphic Log Generator • Crafted by <strong>@Pratyush</strong>
+    Geological Borehole Graphic Log Generator • Crafted by <strong>@Pratyush</strong>
 </div>
 """, unsafe_allow_html=True)
