@@ -66,7 +66,7 @@ if not st.session_state.authenticated:
     with col2:
         st.markdown("""
         <div style="padding: 1.5rem 2rem 0.5rem 2rem; background: #1e293b; border-top-left-radius: 12px; border-top-right-radius: 12px; border: 1px solid #334155; border-bottom: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
-            <h3 style="color: #f1f5f9; margin-top: 0; margin-bottom: 0;">🔒 Access Restricted</h3>
+            <h3 style="color: #f1f5f9; margin-top: 0; margin-bottom: 0;">🔒 LOGIN</h3>
         </div>
         """, unsafe_allow_html=True)
         
