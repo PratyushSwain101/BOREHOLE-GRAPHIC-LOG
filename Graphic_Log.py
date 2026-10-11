@@ -6,11 +6,12 @@ import matplotlib.patches as patches
 from matplotlib.backends.backend_pdf import PdfPages
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 import io
+import os
 
-# --- STREAMLIT PAGE CONFIGURATION ---
+# --- STREAMLIT PAGE CONFIGURATION WITH CUSTOM LOGO ---
 st.set_page_config(
     page_title="Graphic Log Generator | @Pratyush",
-    page_icon="⛏️",
+    page_icon="logo.png" if os.path.exists("logo.png") else "⛏️",
     layout="wide"
 )
 
@@ -57,7 +58,7 @@ def handle_logout():
 if not st.session_state.authenticated:
     st.markdown("""
     <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
-        <h1 style="color: #f59e0b; font-size: 2.5rem; font-weight: 700; margin-bottom: 0;">📊 Graphic Log Generator</h1>
+        <h1 style="color: #f59e0b; font-size: 2.5rem; font-weight: 700; margin-bottom: 0;">Graphic Log Generator</h1>
         <p style="color: #94a3b8; font-size: 1rem; margin-top: 5px;">Automated Graphic Log Generator | Designed by @Pratyush</p>
     </div>
     """, unsafe_allow_html=True)
@@ -94,19 +95,7 @@ st.markdown("""
         color: #e2e8f0;
     }
     
-    /* Unified Header Banner */
-    .header-banner {
-        background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
-        border: 1px solid #334155;
-        padding: 1.25rem 1.75rem;
-        border-radius: 12px;
-        margin-bottom: 1.5rem;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-    }
-    
+    /* Header Banner Container */
     .header-title {
         color: #f59e0b;
         font-size: 2.1rem;
@@ -168,30 +157,35 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# --- UNIFIED TOP HEADER BANNER (PERFECTLY ORGANIZED VIA COLUMNS & FLEXBOX) ---
-hb_col1, hb_col2 = st.columns([3.5, 1.5])
+# --- UNIFIED TOP HEADER BANNER WITH EMBEDDED LOGO IMAGE ---
+hb_col_logo, hb_col_title, hb_col_user = st.columns([0.6, 3.2, 1.8])
 
-with hb_col1:
+with hb_col_logo:
+    if os.path.exists("logo.png"):
+        st.image("logo.png", width=85)
+    else:
+        st.markdown("📊")
+
+with hb_col_title:
     st.markdown("""
     <div>
         <span class="creator-tag">Designed by @Pratyush</span>
-        <div class="header-title">📊 Graphic Log Generator</div>
-        <div class="header-subtitle">Automated Graphic Log Generator</div>
+        <div class="header-title">Graphic Log Generator</div>
+        <div class="header-subtitle">Automated Geological Graphic Log & Plan Map Generator</div>
     </div>
     """, unsafe_allow_html=True)
 
-with hb_col2:
+with hb_col_user:
     st.markdown(f"""
-    <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; height: 100%;">
-        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px;">
-            Welcome, <strong style='color: #f59e0b;'>{st.session_state.name}</strong>
-        </div>
+    <div style="text-align: right; padding-top: 8px;">
+        <span style="color: #94a3b8; font-size: 0.9rem;">Welcome, <strong style='color: #f59e0b;'>{st.session_state.name}</strong></span>
     </div>
     """, unsafe_allow_html=True)
     
-    # Placing logout button cleanly inside the right column without overlapping hacks
-    col_empty, col_btn = st.columns([1, 1.3])
-    with col_btn:
+    st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
+    
+    logout_col1, logout_col2 = st.columns([1, 1.1])
+    with logout_col2:
         if st.button("🚪 Log Out", use_container_width=True, key="logout_btn", type="primary"):
             handle_logout()
             st.rerun()
