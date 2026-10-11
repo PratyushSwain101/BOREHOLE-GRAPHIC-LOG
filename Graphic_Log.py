@@ -223,7 +223,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                 page_label = f"Page {page_idx + 1}" + (f" (Panel {panel + 1}/{num_panels})" if num_panels > 1 else "")
                 fig.suptitle(
                     f"KL BOREHOLE GRAPHIC LOGS — {page_label}\n"
-                    f"Scale: {scale_option} | Column Width: {col_width_cm:.2f} cm | Segment: {depth_start:.1f} m to {depth_end:.1f} m",
+                    f"Scale: {scale_option}",
                     fontsize=12, fontweight='bold', y=0.96
                 )
                 
@@ -348,7 +348,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                             if depth_start <= s_mid <= depth_end:
                                 ax.text(
                                     bracket_x + 0.1, s_mid,
-                                    f"{s_name}\n({s_thick:.2f}m)",
+                                    f"{s_name}({s_thick:.2f}m)",
                                     fontsize=6.5, fontweight='bold', va='center', ha='left', color='black'
                                 )
 
@@ -449,7 +449,7 @@ def create_matplotlib_plan_map(collar_df, boundary_df, selected_bhs):
     )
 
     # Creator Signature Watermark on Map
-    ax.text(0.98, 0.02, "Designed by @Pratyush", transform=ax.transAxes,
+    ax.text(0.98, 0.95, "Designed by @Pratyush", transform=ax.transAxes,
             fontsize=8, color='gray', style='italic', ha='right', va='bottom', zorder=10)
 
     ax.set_title("BOREHOLE LOCATION PLAN MAP", fontsize=10, fontweight='bold', pad=8)
