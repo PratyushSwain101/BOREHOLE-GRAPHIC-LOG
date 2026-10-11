@@ -191,7 +191,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
     page_w_in, page_h_in = get_page_dimensions(page_size, page_orientation)
     
     col_width_in = col_width_cm / 2.54
-    header_height_in = 1.2
+    header_height_in = 1.4
     top_margin_in = 1.0
     bottom_margin_in = 0.8
     
@@ -213,7 +213,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                 
             for panel in range(num_panels):
                 depth_start = panel * max_meters_per_panel
-                depth_end = (panel + 1) * max_meters_per_panel
+                depth_end = min((panel + 1) * max_meters_per_panel, max_chunk_depth)
                 panel_depth_range = depth_end - depth_start
                 
                 panel_h_in = (panel_depth_range / scale_meters_per_cm) / 2.54
@@ -244,7 +244,10 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                     
                     center_x_in = (idx + 0.5) * slot_w_in
                     left_x_in = center_x_in - (col_width_in / 2.0)
-                    bottom_y_in = page_h_in - top_margin_in - header_height_in - panel_h_in
+                    
+                    # Fix: Anchor panel drawing from top printable area downwards consistently
+                    top_y_in = page_h_in - top_margin_in - header_height_in
+                    bottom_y_in = top_y_in - panel_h_in
                     
                     norm_rect = [
                         left_x_in / page_w_in,
@@ -335,7 +338,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                                 ax.text(-0.18, s_from, f"{s_from:.2f}", fontsize=5.5, va='center', ha='right', color='crimson', fontweight='bold')
                             if depth_start <= s_to <= depth_end:
                                 ax.plot([-0.15, 0], [s_to, s_to], color='crimson', lw=0.7, clip_on=False)
-                                ax.text(-0.18, s_to, f"{s_to:.2f}", fontsize=5.5, va='center', ha='right', color='crimson', fontweight='bold')
+                                ax.text(-0.18, s_to, f"{s_to::.2f}" if False else f"{s_to:.2f}", fontsize=5.5, va='center', ha='right', color='crimson', fontweight='bold')
                             
                             b_top = max(s_from, depth_start)
                             b_bot = min(s_to, depth_end)
@@ -367,7 +370,6 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
             
     pdf_buffer.seek(0)
     return pdf_buffer
-
 
 def create_matplotlib_plan_map(collar_df, boundary_df, selected_bhs):
     """Generate publication-ready Matplotlib map with signature watermark."""
@@ -619,4 +621,4 @@ st.markdown("""
 <div class="app-footer">
     Geological Borehole Graphic Log Generator • Crafted by <strong>@Pratyush</strong>
 </div>
-""", unsafe_allow_html=True)
+""", unsafe_allow_html=True)s
