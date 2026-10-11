@@ -14,6 +14,77 @@ st.set_page_config(
     layout="wide"
 )
 
+# --- MULTI-USER CREDENTIALS DATABASE ---
+# Add or modify usernames and passwords here: {"username": "password"}
+USER_CREDENTIALS = {
+    "pratyush": "Ps@123548",
+    "admin": "admin@123",
+    "geologist": "strata2026"
+}
+
+# --- AUTHENTICATION STATE MANAGEMENT ---
+if "authenticated" not in st.session_state:
+    st.session_state.authenticated = False
+if "username" not in st.session_state:
+    st.session_state.username = ""
+if "name" not in st.session_state:
+    st.session_state.name = ""
+if "login_failed" not in st.session_state:
+    st.session_state.login_failed = False
+
+def handle_login():
+    """Validates username and password submitted via form."""
+    u = st.session_state.get("login_user", "").strip().lower()
+    p = st.session_state.get("login_pass", "")
+    
+    if u in USER_CREDENTIALS and USER_CREDENTIALS[u] == p:
+        st.session_state.authenticated = True
+        st.session_state.username = u
+        st.session_state.name = u.capitalize()
+        st.session_state.login_failed = False
+    else:
+        st.session_state.authenticated = False
+        st.session_state.login_failed = True
+
+def handle_logout():
+    """Logs out the user."""
+    st.session_state.authenticated = False
+    st.session_state.username = ""
+    st.session_state.name = ""
+    st.session_state.login_failed = False
+
+# --- LOGIN SCREEN ---
+if not st.session_state.authenticated:
+    st.markdown("""
+    <div style="text-align: center; margin-top: 40px; margin-bottom: 20px;">
+        <h1 style="color: #f59e0b; font-size: 2.5rem; font-weight: 700; margin-bottom: 0;">📊 Graphic Log Generator</h1>
+        <p style="color: #94a3b8; font-size: 1rem; margin-top: 5px;">Automated Graphic Log Generator | Designed by @Pratyush</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    col1, col2, col3 = st.columns([1, 1.2, 1])
+    with col2:
+        st.markdown("""
+        <div style="padding: 1.5rem 2rem 0.5rem 2rem; background: #1e293b; border-top-left-radius: 12px; border-top-right-radius: 12px; border: 1px solid #334155; border-bottom: none; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+            <h3 style="color: #f1f5f9; margin-top: 0; margin-bottom: 0;">🔒 Access Restricted</h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        with st.form("login_form", clear_on_submit=False):
+            st.text_input("Username", key="login_user", placeholder="Enter username...")
+            st.text_input("Password", type="password", key="login_pass", placeholder="Enter password...")
+            
+            if st.session_state.login_failed:
+                st.markdown("<p style='color: #ef4444; font-size: 0.85rem; font-weight: 600; margin-top: 5px;'>❌ Incorrect username or password. Please try again.</p>", unsafe_allow_html=True)
+                
+            st.markdown("<div style='height: 5px;'></div>", unsafe_allow_html=True)
+            submit_btn = st.form_submit_button("Log In", use_container_width=True, type="primary")
+            if submit_btn:
+                handle_login()
+                st.rerun()
+            
+    st.stop()  # Halts app execution until authenticated
+
 # --- MODERN STYLING & COLOR SCHEME (SLATE & GOLD) ---
 st.markdown("""
 <style>
@@ -23,14 +94,17 @@ st.markdown("""
         color: #e2e8f0;
     }
     
-    /* Header Card */
-    .header-card {
+    /* Unified Header Banner */
+    .header-banner {
         background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
         border: 1px solid #334155;
         padding: 1.25rem 1.75rem;
         border-radius: 12px;
         margin-bottom: 1.5rem;
         box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
     
     .header-title {
@@ -38,6 +112,7 @@ st.markdown("""
         font-size: 2.1rem;
         font-weight: 700;
         margin: 0;
+        line-height: 1.2;
     }
     
     .header-subtitle {
@@ -48,14 +123,15 @@ st.markdown("""
 
     /* Creator Signature Tag */
     .creator-tag {
-        float: right;
         background-color: #334155;
         color: #fbbf24;
-        padding: 0.25rem 0.75rem;
+        padding: 0.2rem 0.6rem;
         border-radius: 20px;
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         font-weight: 600;
         border: 1px solid #d97706;
+        display: inline-block;
+        margin-bottom: 0.35rem;
     }
 
     /* Subheaders and Section Titles */
@@ -71,7 +147,7 @@ st.markdown("""
         border: none !important;
         border-radius: 8px !important;
         font-weight: 600 !important;
-        padding: 0.6rem 1.2rem !important;
+        padding: 0.5rem 1rem !important;
         box-shadow: 0 4px 6px -1px rgba(217, 119, 6, 0.4) !important;
     }
     
@@ -92,16 +168,37 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# App Header Banner with Creator Signature
-st.markdown("""
-<div class="header-card">
-    <span class="creator-tag">Designed by @Pratyush</span>
-    <div class="header-title">📊 Graphic Log Generator</div>
-    <div class="header-subtitle">Automated Graphic Log Generator</div>
-</div>
-""", unsafe_allow_html=True)
+# --- UNIFIED TOP HEADER BANNER (PERFECTLY ORGANIZED VIA COLUMNS & FLEXBOX) ---
+hb_col1, hb_col2 = st.columns([3.5, 1.5])
 
-# Initialize Session State
+with hb_col1:
+    st.markdown("""
+    <div>
+        <span class="creator-tag">Designed by @Pratyush</span>
+        <div class="header-title">📊 Graphic Log Generator</div>
+        <div class="header-subtitle">Automated Graphic Log Generator</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+with hb_col2:
+    st.markdown(f"""
+    <div style="display: flex; flex-direction: column; align-items: flex-end; justify-content: center; height: 100%;">
+        <div style="color: #94a3b8; font-size: 0.9rem; margin-bottom: 8px;">
+            Welcome, <strong style='color: #f59e0b;'>{st.session_state.name}</strong>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Placing logout button cleanly inside the right column without overlapping hacks
+    col_empty, col_btn = st.columns([1, 1.3])
+    with col_btn:
+        if st.button("🚪 Log Out", use_container_width=True, key="logout_btn", type="primary"):
+            handle_logout()
+            st.rerun()
+
+st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+# Initialize Session State for PDF
 if "generated_pdf" not in st.session_state:
     st.session_state.generated_pdf = None
 if "pdf_filename" not in st.session_state:
@@ -245,7 +342,6 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                     center_x_in = (idx + 0.5) * slot_w_in
                     left_x_in = center_x_in - (col_width_in / 2.0)
                     
-                    # Fix: Anchor panel drawing from top printable area downwards consistently
                     top_y_in = page_h_in - top_margin_in - header_height_in
                     bottom_y_in = top_y_in - panel_h_in
                     
@@ -338,7 +434,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
                                 ax.text(-0.18, s_from, f"{s_from:.2f}", fontsize=5.5, va='center', ha='right', color='crimson', fontweight='bold')
                             if depth_start <= s_to <= depth_end:
                                 ax.plot([-0.15, 0], [s_to, s_to], color='crimson', lw=0.7, clip_on=False)
-                                ax.text(-0.18, s_to, f"{s_to::.2f}" if False else f"{s_to:.2f}", fontsize=5.5, va='center', ha='right', color='crimson', fontweight='bold')
+                                ax.text(-0.18, s_to, f"{s_to:.2f}", fontsize=5.5, va='center', ha='right', color='crimson', fontweight='bold')
                             
                             b_top = max(s_from, depth_start)
                             b_bot = min(s_to, depth_end)
@@ -370,6 +466,7 @@ def create_graphic_logs_pdf(collar_df, litho_df, merged_seams_df, bh_list, page_
             
     pdf_buffer.seek(0)
     return pdf_buffer
+
 
 def create_matplotlib_plan_map(collar_df, boundary_df, selected_bhs):
     """Generate publication-ready Matplotlib map with signature watermark."""
@@ -505,7 +602,7 @@ with tab2:
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
         
         with col_c1:
-            page_size = st.selectbox("Page Size", options=["A3", "A4", "A2"], index=0)
+            page_size = st.selectbox("Page Size", options=["A3", "A4", "A2"], index=1)
         with col_c2:
             page_orientation = st.selectbox("Page Orientation", options=["Portrait","Landscape"], index=0)
         with col_c3:
@@ -516,7 +613,7 @@ with tab2:
             )
             scale_meters_per_cm = float(scale_option.split("=")[1].replace("m", "").strip())
         with col_c4:
-            col_width_cm = st.number_input("Log Column Width (cm)", min_value=0.2, max_value=2.0, value=0.5, step=0.1)
+            col_width_cm = st.number_input("Log Column Width (cm)", min_value=0.2, max_value=2.0, value=0.4, step=0.1)
 
         st.markdown("---")
         st.header("2. Select Target Boreholes (Max - 5 at a time)")
@@ -603,7 +700,6 @@ with tab4:
             if reset_all:
                 filter_bhs = []
         
-        # Determine active dataset to display
         display_seams = merged_seams_df if not filter_bhs else merged_seams_df[merged_seams_df['BORE ID'].isin(filter_bhs)]
         display_collars = collar_df if not filter_bhs else collar_df[collar_df['BORE ID'].isin(filter_bhs)]
         
