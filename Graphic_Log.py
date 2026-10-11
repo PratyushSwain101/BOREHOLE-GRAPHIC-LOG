@@ -621,4 +621,4 @@ st.markdown("""
 <div class="app-footer">
     Geological Borehole Graphic Log Generator • Crafted by <strong>@Pratyush</strong>
 </div>
-""", unsafe_allow_html=True)s
+""", unsafe_allow_html=True)
