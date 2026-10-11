@@ -18,7 +18,7 @@ st.set_page_config(
 # Add or modify usernames and passwords here: {"username": "password"}
 USER_CREDENTIALS = {
     "pratyush": "Ps@123548",
-    "admin": "admin@123",
+    "Admin": "Admin@123",
     "geologist": "strata2026"
 }
 
