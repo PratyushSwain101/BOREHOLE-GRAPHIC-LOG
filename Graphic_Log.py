@@ -85,7 +85,7 @@ if not st.session_state.authenticated:
             
     st.stop()  # Halts app execution until authenticated
 
-# --- MODERN STYLING & COLOR SCHEME (SLATE & GOLD) ---
+
 st.markdown("""
 <style>
     /* Main Background & Text Colors */
@@ -602,7 +602,7 @@ with tab2:
         col_c1, col_c2, col_c3, col_c4 = st.columns(4)
         
         with col_c1:
-            page_size = st.selectbox("Page Size", options=["A3", "A4", "A2"], index=1)
+            page_size = st.selectbox("Page Size", options=["A3", "A4", "A2"], index=0)
         with col_c2:
             page_orientation = st.selectbox("Page Orientation", options=["Portrait","Landscape"], index=0)
         with col_c3:
