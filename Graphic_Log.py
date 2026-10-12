@@ -205,7 +205,7 @@ if "pdf_filename" not in st.session_state:
     st.session_state.pdf_filename = ""
 
 
-def preprocess_litho(litho_df, max_gap_meters=2.0):
+def preprocess_litho(litho_df, max_gap_meters=0.49):
     """Clean lithology data and merge consecutively occurring identical seams."""
     litho_df = litho_df.copy()
     litho_df.columns = [c.strip().upper() for c in litho_df.columns]
